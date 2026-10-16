@@ -17,8 +17,8 @@
       "icons/icon.ico"
     ]
   },
-  "productName": "Marwa Traders CMS",
-  "mainBinaryName": "Marwa Traders CMS",
+  "productName": "Marwa Traders",
+  "mainBinaryName": "Marwa Traders",
   "version": "1.0.0",
   "identifier": "com.marwatraders.cms",
   "plugins": {},
@@ -27,7 +27,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Marwa Traders — Collection Management System",
+        "title": "Marwa Traders",
         "width": 1280,
         "height": 840,
         "minWidth": 1024,

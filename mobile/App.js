@@ -11,15 +11,18 @@ import {
   Alert,
   ScrollView,
   StatusBar,
+  Platform,
 } from 'react-native';
 import api, { setAuthToken } from './src/services/api';
 import { ThermalPrinterService } from './src/services/printerService';
 import { getCollectionLocation } from './src/services/locationService';
 
+const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 28) : 0;
+
 export default function App() {
   const [screen, setScreen] = useState('login'); // 'login' | 'dashboard' | 'search' | 'collect' | 'confirm' | 'success' | 'history'
   const [user, setUser] = useState(null);
-  const [code, setCode] = useState('4001'); // Default collector Ravi
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Today summary
@@ -244,18 +247,17 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
+      <StatusBar barStyle="light-content" backgroundColor="#0f172a" translucent={true} />
 
       {/* 1. LOGIN SCREEN */}
       {screen === 'login' && (
         <View style={styles.loginContainer}>
           <View style={styles.brandBox}>
             <Text style={styles.brandTitle}>MARWA TRADERS</Text>
-            <Text style={styles.brandSubtitle}>Cash Collector Mobile App</Text>
           </View>
 
           <View style={styles.loginCard}>
-            <Text style={styles.inputLabel}>ENTER CODE</Text>
+            <Text style={styles.inputLabel}>ENTER ACCESS CODE</Text>
             <TextInput
               style={styles.codeInput}
               keyboardType="numeric"
@@ -263,8 +265,8 @@ export default function App() {
               secureTextEntry
               value={code}
               onChangeText={setCode}
-              placeholder="4001"
-              placeholderTextColor="#94a3b8"
+              placeholder="Enter PIN"
+              placeholderTextColor="#64748b"
             />
 
             <TouchableOpacity
@@ -278,18 +280,6 @@ export default function App() {
                 <Text style={styles.primaryButtonText}>LOGIN</Text>
               )}
             </TouchableOpacity>
-
-            <View style={styles.demoCodes}>
-              <Text style={styles.demoLabel}>Quick Test Collectors:</Text>
-              <View style={styles.demoRow}>
-                <TouchableOpacity onPress={() => setCode('4001')} style={styles.demoBtn}>
-                  <Text style={styles.demoBtnText}>4001: Ravi</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setCode('4002')} style={styles.demoBtn}>
-                  <Text style={styles.demoBtnText}>4002: Kumar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
           </View>
         </View>
       )}
@@ -299,11 +289,19 @@ export default function App() {
         <View style={styles.screenContainer}>
           <View style={styles.header}>
             <View>
-              <Text style={styles.headerRole}>COLLECTOR</Text>
+              <Text style={styles.headerAppTitle}>MARWA TRADERS</Text>
               <Text style={styles.headerName}>{user?.name} ({user?.code})</Text>
             </View>
-            <TouchableOpacity onPress={() => setScreen('login')} style={styles.logoutBtn}>
-              <Text style={styles.logoutText}>Logout</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setUser(null);
+                setCode('');
+                setScreen('login');
+              }}
+              style={styles.logoutBtn}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
+              <Text style={styles.logoutText}>LOGOUT</Text>
             </TouchableOpacity>
           </View>
 
@@ -410,7 +408,11 @@ export default function App() {
       {screen === 'search' && (
         <View style={styles.screenContainer}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => setScreen('dashboard')} style={styles.backBtn}>
+            <TouchableOpacity
+              onPress={() => setScreen('dashboard')}
+              style={styles.backBtn}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Text style={styles.backText}>← Back</Text>
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Search Customer</Text>
@@ -464,7 +466,11 @@ export default function App() {
       {screen === 'collect' && selectedCustomer && (
         <View style={styles.screenContainer}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => setScreen('search')} style={styles.backBtn}>
+            <TouchableOpacity
+              onPress={() => setScreen('search')}
+              style={styles.backBtn}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Text style={styles.backText}>← Back</Text>
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Collect Payment</Text>
@@ -531,7 +537,11 @@ export default function App() {
       {screen === 'confirm' && selectedCustomer && (
         <View style={styles.screenContainer}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => setScreen('collect')} style={styles.backBtn}>
+            <TouchableOpacity
+              onPress={() => setScreen('collect')}
+              style={styles.backBtn}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Text style={styles.backText}>← Back</Text>
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Confirmation</Text>
@@ -671,7 +681,11 @@ export default function App() {
       {screen === 'history' && (
         <View style={styles.screenContainer}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => setScreen('dashboard')} style={styles.backBtn}>
+            <TouchableOpacity
+              onPress={() => setScreen('dashboard')}
+              style={styles.backBtn}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Text style={styles.backText}>← Back</Text>
             </TouchableOpacity>
             <Text style={styles.headerTitle}>My Collections</Text>
@@ -700,12 +714,15 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+    paddingTop: ANDROID_STATUS_BAR,
+  },
   screenContainer: { flex: 1, backgroundColor: '#f8fafc' },
   loginContainer: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#0f172a' },
   brandBox: { alignItems: 'center', marginBottom: 32 },
   brandTitle: { fontSize: 26, fontWeight: '900', color: '#fff', letterSpacing: 2 },
-  brandSubtitle: { fontSize: 13, color: '#38bdf8', marginTop: 4, fontWeight: '600' },
   loginCard: { backgroundColor: '#1e293b', padding: 24, borderRadius: 24, borderWidth: 1, borderColor: '#334155' },
   inputLabel: { fontSize: 12, fontWeight: '800', color: '#94a3b8', textAlign: 'center', marginBottom: 12, letterSpacing: 1 },
   codeInput: {
@@ -723,27 +740,41 @@ const styles = StyleSheet.create({
   },
   primaryButton: { backgroundColor: '#0284c7', paddingVertical: 16, borderRadius: 16, alignItems: 'center' },
   primaryButtonText: { color: '#fff', fontWeight: '800', fontSize: 15, letterSpacing: 1 },
-  demoCodes: { marginTop: 20, borderTopWidth: 1, borderColor: '#334155', paddingTop: 16 },
-  demoLabel: { fontSize: 11, color: '#64748b', textAlign: 'center', marginBottom: 8 },
-  demoRow: { flexDirection: 'row', justifyContent: 'center', gap: 10 },
-  demoBtn: { backgroundColor: '#0f172a', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  demoBtnText: { color: '#34d399', fontSize: 12, fontWeight: '600' },
 
   header: {
     backgroundColor: '#0f172a',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingTop: 10,
+    paddingBottom: 14,
+    minHeight: 62,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1e293b',
   },
+  headerAppTitle: { fontSize: 11, color: '#38bdf8', fontWeight: '800', letterSpacing: 1 },
   headerRole: { fontSize: 10, color: '#34d399', fontWeight: '800', letterSpacing: 1 },
-  headerName: { fontSize: 15, color: '#fff', fontWeight: '800' },
-  headerTitle: { fontSize: 16, color: '#fff', fontWeight: '800' },
-  logoutBtn: { padding: 6 },
-  logoutText: { color: '#f87171', fontSize: 12, fontWeight: '600' },
-  backBtn: { padding: 4 },
-  backText: { color: '#38bdf8', fontSize: 14, fontWeight: '700' },
+  headerName: { fontSize: 16, color: '#fff', fontWeight: '800', marginTop: 2 },
+  headerTitle: { fontSize: 17, color: '#fff', fontWeight: '800' },
+  logoutBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+  },
+  logoutText: { color: '#fca5a5', fontSize: 13, fontWeight: '800', letterSpacing: 0.5 },
+  backBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.4)',
+  },
+  backText: { color: '#38bdf8', fontSize: 14, fontWeight: '800' },
 
   content: { padding: 16 },
   kpiCard: { backgroundColor: '#059669', padding: 20, borderRadius: 20, marginBottom: 12 },
