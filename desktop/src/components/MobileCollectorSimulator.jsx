@@ -266,7 +266,7 @@ export default function MobileCollectorSimulator({ onClose, onPrintReceipt }) {
                   <Smartphone className="w-7 h-7" />
                 </div>
                 <h1 className="text-xl font-black tracking-wider">MARWA TRADERS</h1>
-                <p className="text-xs text-sky-400 font-semibold mt-0.5">Cash Collector Android App</p>
+                <p className="text-xs text-sky-400 font-semibold mt-0.5">Owner & Cash Collector Only</p>
               </div>
 
               <div className="space-y-4">
@@ -277,7 +277,7 @@ export default function MobileCollectorSimulator({ onClose, onPrintReceipt }) {
                 )}
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase text-center mb-1">
-                    Enter Collector Code
+                    Enter Access Code
                   </label>
                   <input
                     type="password"
@@ -290,18 +290,25 @@ export default function MobileCollectorSimulator({ onClose, onPrintReceipt }) {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="grid grid-cols-3 gap-2 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => setLoginCode('1001')}
+                    className="py-1.5 px-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-sky-300 font-medium text-center"
+                  >
+                    Owner (1001)
+                  </button>
                   <button
                     type="button"
                     onClick={() => setLoginCode('4001')}
-                    className="py-1.5 px-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-emerald-300 font-medium text-center"
+                    className="py-1.5 px-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-emerald-300 font-medium text-center"
                   >
                     Ravi (4001)
                   </button>
                   <button
                     type="button"
                     onClick={() => setLoginCode('4002')}
-                    className="py-1.5 px-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-emerald-300 font-medium text-center"
+                    className="py-1.5 px-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-emerald-300 font-medium text-center"
                   >
                     Kumar (4002)
                   </button>
