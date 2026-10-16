@@ -80,9 +80,9 @@ export default function MobileCollectorSimulator({ onClose, onPrintReceipt }) {
     e?.preventDefault();
     setLoginError(null);
     try {
-      const res = await api.post('/auth/login', { code: loginCode.trim() });
-      if (res.data.user.role !== 'CASH_COLLECTOR' && res.data.user.role !== 'OWNER' && res.data.user.role !== 'ADMIN') {
-        throw new Error('Please login with a Cash Collector code (e.g. 4001 or 4002)');
+      const res = await api.post('/auth/login', { code: loginCode.trim(), client: 'mobile' });
+      if (res.data.user.role !== 'CASH_COLLECTOR' && res.data.user.role !== 'OWNER') {
+        throw new Error('Access denied: Only Owner and Cash Collectors can access the mobile collection app.');
       }
       setCollectorUser(res.data.user);
       setCollectorToken(res.data.token);

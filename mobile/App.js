@@ -48,12 +48,22 @@ export default function App() {
   // Login handler
   const handleLogin = async () => {
     if (!code.trim()) {
-      Alert.alert('Error', 'Please enter your collector code');
+      Alert.alert('Error', 'Please enter your access PIN code');
       return;
     }
     setLoading(true);
     try {
-      const res = await api.post('/auth/login', { code: code.trim() });
+      const res = await api.post('/auth/login', { code: code.trim(), client: 'mobile' });
+      const userRole = res.data.user?.role;
+      if (userRole !== 'OWNER' && userRole !== 'CASH_COLLECTOR') {
+        setAuthToken(null);
+        setUser(null);
+        Alert.alert(
+          'Access Denied',
+          'Only Owner and Cash Collectors are authorized to use the mobile collection app. Admin and Staff cannot log in here.'
+        );
+        return;
+      }
       setAuthToken(res.data.token);
       setUser(res.data.user);
       setScreen('dashboard');
@@ -280,6 +290,10 @@ export default function App() {
                 <Text style={styles.primaryButtonText}>LOGIN</Text>
               )}
             </TouchableOpacity>
+
+            <Text style={styles.accessNote}>
+              🔒 Authorized Access: Owner & Cash Collectors Only
+            </Text>
           </View>
         </View>
       )}
@@ -289,7 +303,7 @@ export default function App() {
         <View style={styles.screenContainer}>
           <View style={styles.header}>
             <View>
-              <Text style={styles.headerAppTitle}>MARWA TRADERS</Text>
+              <Text style={styles.headerAppTitle}>MARWA TRADERS • {user?.role ? user.role.replace('_', ' ') : 'MEMBER'}</Text>
               <Text style={styles.headerName}>{user?.name} ({user?.code})</Text>
             </View>
             <TouchableOpacity
@@ -866,5 +880,12 @@ const styles = StyleSheet.create({
 
   signOutBtn: { backgroundColor: '#e11d48', paddingVertical: 14, borderRadius: 16, alignItems: 'center' },
   signOutText: { color: '#fff', fontSize: 13, fontWeight: '800', letterSpacing: 1 },
+  accessNote: {
+    color: '#94a3b8',
+    fontSize: 11,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 14,
+  },
 });
 
