@@ -19,6 +19,106 @@ import { getCollectionLocation } from './src/services/locationService';
 
 const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 28) : 0;
 
+function formatReceiptDate(date) {
+  if (!date) return '';
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${day}-${month}-${d.getFullYear()}`;
+}
+
+function formatReceiptTime(date) {
+  if (!date) return '';
+  const d = new Date(date);
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+}
+
+function ReceiptPreview({ payment, customer, collectorName }) {
+  if (!payment) return null;
+
+  const customerName = (
+    payment.customerId?.shopName ||
+    customer?.shopName ||
+    'CUSTOMER'
+  ).toUpperCase();
+  const collectedBy = (
+    payment.collectedBy?.name ||
+    collectorName ||
+    'COLLECTOR'
+  ).toUpperCase();
+  const locationName =
+    payment.location?.locationName ||
+    payment.customerId?.address ||
+    customer?.address ||
+    'Counter';
+  const mode = payment.paymentMode || 'CASH';
+
+  return (
+    <View style={styles.thermalSlip}>
+      <Text style={styles.thermalBrand}>MARWA TRADERS</Text>
+      <Text style={styles.thermalTitle}>PAYMENT RECEIPT</Text>
+      <View style={styles.thermalDash} />
+
+      <Text style={styles.thermalLabel}>Receipt No:</Text>
+      <Text style={styles.thermalValue}>{payment.receiptNumber}</Text>
+
+      <Text style={[styles.thermalLabel, { marginTop: 8 }]}>Customer:</Text>
+      <Text style={styles.thermalCustomer}>{customerName}</Text>
+
+      <View style={styles.thermalDash} />
+
+      <View style={styles.thermalRow}>
+        <Text style={styles.thermalRowLabel}>Previous Due:</Text>
+        <Text style={styles.thermalRowValue}>
+          ₹{Number(payment.previousOutstanding || 0).toLocaleString('en-IN')}
+        </Text>
+      </View>
+      <View style={styles.thermalPayRow}>
+        <Text style={styles.thermalPayLabel}>Payment Recd:</Text>
+        <Text style={styles.thermalPayValue}>
+          ₹{Number(payment.amount || 0).toLocaleString('en-IN')}
+        </Text>
+      </View>
+      <View style={styles.thermalRow}>
+        <Text style={styles.thermalRowLabel}>Balance Due:</Text>
+        <Text style={styles.thermalRowStrong}>
+          ₹{Number(payment.remainingOutstanding || 0).toLocaleString('en-IN')}
+        </Text>
+      </View>
+
+      <View style={styles.thermalDash} />
+
+      <View style={styles.thermalRow}>
+        <Text style={styles.thermalRowLabel}>Payment Mode:</Text>
+        <Text style={styles.thermalRowStrong}>{mode}</Text>
+      </View>
+      <View style={styles.thermalRow}>
+        <Text style={styles.thermalRowLabel}>Collected By:</Text>
+        <Text style={styles.thermalRowStrong}>{collectedBy}</Text>
+      </View>
+      <View style={styles.thermalRow}>
+        <Text style={styles.thermalRowLabel}>Date:</Text>
+        <Text style={styles.thermalRowValue}>{formatReceiptDate(payment.createdAt)}</Text>
+      </View>
+      <View style={styles.thermalRow}>
+        <Text style={styles.thermalRowLabel}>Time:</Text>
+        <Text style={styles.thermalRowValue}>{formatReceiptTime(payment.createdAt)}</Text>
+      </View>
+      <View style={styles.thermalRow}>
+        <Text style={styles.thermalRowLabel}>Location:</Text>
+        <Text style={[styles.thermalRowValue, { flex: 1, textAlign: 'right' }]}>{locationName}</Text>
+      </View>
+
+      <View style={styles.thermalDash} />
+      <Text style={styles.thermalThanks}>THANK YOU</Text>
+    </View>
+  );
+}
+
 export default function App() {
   const [screen, setScreen] = useState('login'); // 'login' | 'dashboard' | 'search' | 'collect' | 'confirm' | 'success' | 'history'
   const [user, setUser] = useState(null);
@@ -652,16 +752,11 @@ export default function App() {
                 </View>
               ) : null}
 
-              <View style={styles.receiptBox}>
-                <Text style={styles.receiptLine}>Receipt No:   {confirmedPayment.receiptNumber}</Text>
-                <Text style={styles.receiptLine}>Customer:     {selectedCustomer?.shopName}</Text>
-                <Text style={styles.receiptLine}>Mode:         {confirmedPayment.paymentMode || paymentMode}</Text>
-                <Text style={styles.receiptLine}>Received:     ₹{Number(confirmedPayment.amount).toLocaleString('en-IN')}</Text>
-                <Text style={styles.receiptLine}>Remaining:    ₹{Number(confirmedPayment.remainingOutstanding).toLocaleString('en-IN')}</Text>
-                {confirmedPayment.location?.latitude && (
-                  <Text style={styles.receiptLine}>GPS Coords:   {confirmedPayment.location.latitude}, {confirmedPayment.location.longitude}</Text>
-                )}
-              </View>
+              <ReceiptPreview
+                payment={confirmedPayment}
+                customer={selectedCustomer}
+                collectorName={user?.name}
+              />
 
               <View style={[styles.receiptNoticeBox, { width: '100%', marginTop: 14 }]}>
                 <Text style={styles.receiptNoticeText}>
@@ -850,8 +945,48 @@ const styles = StyleSheet.create({
   successHeading: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginTop: 8 },
   printerAlert: { backgroundColor: '#fef3c7', padding: 10, borderRadius: 10, marginTop: 12, borderWidth: 1, borderColor: '#fde68a' },
   printerAlertText: { color: '#92400e', fontSize: 12, fontWeight: '700', textAlign: 'center' },
-  receiptBox: { marginTop: 16, backgroundColor: '#f8fafc', padding: 14, borderRadius: 12, width: '100%', borderWidth: 1, borderColor: '#e2e8f0' },
-  receiptLine: { fontSize: 12, color: '#334155', fontFamily: 'monospace', paddingVertical: 2 },
+  thermalSlip: {
+    marginTop: 16,
+    width: '100%',
+    backgroundColor: '#ffffff',
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  thermalBrand: { textAlign: 'center', fontSize: 15, fontWeight: '900', color: '#0f172a', letterSpacing: 1 },
+  thermalTitle: {
+    textAlign: 'center',
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#0f172a',
+    letterSpacing: 1.2,
+    marginTop: 2,
+    paddingBottom: 8,
+  },
+  thermalDash: { borderTopWidth: 1, borderStyle: 'dashed', borderColor: '#0f172a', marginVertical: 8 },
+  thermalLabel: { fontSize: 11, fontWeight: '700', color: '#0f172a' },
+  thermalValue: { fontSize: 12, fontWeight: '900', color: '#0f172a', marginTop: 2 },
+  thermalCustomer: { fontSize: 13, fontWeight: '900', color: '#0f172a', marginTop: 2 },
+  thermalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingVertical: 2 },
+  thermalRowLabel: { fontSize: 11, color: '#0f172a' },
+  thermalRowValue: { fontSize: 11, fontWeight: '700', color: '#0f172a' },
+  thermalRowStrong: { fontSize: 12, fontWeight: '900', color: '#0f172a' },
+  thermalPayRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    marginVertical: 4,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#0f172a',
+  },
+  thermalPayLabel: { fontSize: 12, fontWeight: '900', color: '#0f172a' },
+  thermalPayValue: { fontSize: 13, fontWeight: '900', color: '#0f172a' },
+  thermalThanks: { textAlign: 'center', fontSize: 12, fontWeight: '900', letterSpacing: 2, color: '#0f172a', marginTop: 4 },
   printButton: { backgroundColor: '#0284c7', paddingVertical: 16, borderRadius: 16, alignItems: 'center', marginBottom: 10 },
   printButtonText: { color: '#fff', fontWeight: '800', fontSize: 14 },
   doneButton: { backgroundColor: '#f1f5f9', paddingVertical: 14, borderRadius: 16, alignItems: 'center' },

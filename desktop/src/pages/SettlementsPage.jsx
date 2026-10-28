@@ -146,7 +146,7 @@ export default function SettlementsPage() {
                 <option value="">-- Choose Collector --</option>
                 {collectors.map((c) => (
                   <option key={c._id} value={c._id}>
-                    {c.name} ({c.code})
+                    {c.name} ({c.code}){c.role === 'OWNER' ? ' · Owner' : ''}
                   </option>
                 ))}
               </select>
